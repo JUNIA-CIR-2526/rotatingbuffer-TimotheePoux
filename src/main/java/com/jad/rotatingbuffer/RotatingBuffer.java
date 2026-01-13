@@ -6,17 +6,22 @@ public class RotatingBuffer<E> {
   private final RotatingBufferReader<E> reader;
   private final RotatingBufferWriter<E> writer;
 
+  private boolean empty = true;
+  private final int size;
+
   @SuppressWarnings("unchecked")
   public RotatingBuffer(final int size) {
-    this.data = (E[]) new Object[this.getSize()];
+      this.size = size;
+
+      this.data = (E[]) new Object[this.getSize()];
 
     // TODO: Continue the constructor implementation here You have to change the two lines below
-    this.reader = null;
-    this.writer = null;
+    this.reader = new RotatingBufferReader<>();
+    this.writer = new RotatingBufferWriter<>();
   }
 
   public final int getSize() {
-    throw new UnsupportedOperationException("Not implemented yet");
+      return size;
   }
 
   public final void reset() {
@@ -24,11 +29,11 @@ public class RotatingBuffer<E> {
   }
 
   public final boolean isEmpty() {
-    throw new UnsupportedOperationException("Not implemented yet");
+      return empty;
   }
 
   public final boolean isFull() {
-    throw new UnsupportedOperationException("Not implemented yet");
+      return getReaderIndex() == getWriterIndex() && !empty;
   }
 
   int getReaderIndex() {
@@ -36,11 +41,15 @@ public class RotatingBuffer<E> {
   }
 
   public final synchronized E read() {
-    return this.reader.read();
+      if (getReaderIndex() == getWriterIndex()){
+          empty = true;
+      }
+      return this.reader.read();
   }
 
   public final synchronized boolean write(final E data) {
-    return this.writer.write(data);
+      empty = false;
+      return this.writer.write(data);
   }
 
   final int getWriterIndex() {
